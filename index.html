@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L'Archipel</title>
+<meta name="description" content="L'Archipel, un studio de production où l'on voit l'IA écrire, en direct.">
+<meta property="og:title" content="L'Archipel">
+<meta property="og:description" content="Un studio où l'on voit l'IA écrire.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Concept : un studio où l'on voit l'IA écrire. Un monde de porcelaine et d'encre :
+     chaque agent est une nuée de lettres au-dessus de son socle ; quand il travaille,
+     les lettres se détachent et viennent s'écrire sur sa feuille. En veille, il reste une brume.
+     Thème unique assumé (porcelaine claire), couleurs toutes définies ici. */
+  :root {
+    --porcelaine: #e8ecf0;   /* fond */
+    --porcelaine-2: #dce2e8; /* fond bas */
+    --socle: #f6f8fa;        /* dessus des socles */
+    --encre: #16223d;        /* texte, traits */
+    --encre-pale: #6b7891;   /* texte secondaire */
+    --outremer: #2f4bff;     /* présence active */
+    --ambre: #c98a12;        /* mission programmée */
+    --brume: #8a97ad;        /* en veille */
+    --alerte: #d6455d;       /* vie qui s'épuise */
+    --verre: rgba(255,255,255,.62);
+    --display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', sans-serif;
+    --texte: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { overflow: hidden; background: var(--porcelaine); color: var(--encre); font-family: var(--texte); -webkit-font-smoothing: antialiased; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+  .hud { position: fixed; z-index: 2; pointer-events: none; }
+  .haut { top: calc(22px + env(safe-area-inset-top, 0px)); left: 28px; right: 28px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+  .marque h1 { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 4.6vw, 58px); letter-spacing: -.045em; line-height: .92; font-variation-settings: "opsz" 96; text-wrap: balance; }
+  .marque p { font-family: var(--display); font-weight: 300; font-size: clamp(15px, 1.6vw, 20px); color: var(--encre-pale); margin-top: 8px; letter-spacing: -.01em; max-width: 30ch; }
+  .pastilles { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pastille { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; padding: 8px 12px; border-radius: 999px; background: var(--verre);
+    border: 1px solid rgba(22,34,61,.08); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .pastille.direct { color: var(--alerte); }
+  .pastille.direct::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--alerte); animation: clign 1.4s infinite; }
+  .pastille b { color: var(--outremer); font-weight: 500; }
+  @keyframes clign { 50% { opacity: .25; } }
+
+  .bas { left: 20px; right: 20px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; }
+  .carte { background: var(--verre); border: 1px solid rgba(22,34,61,.07); border-radius: 16px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .plats { display: flex; padding: 8px; }
+  .plat { padding: 8px 14px; min-width: 150px; }
+  .plat + .plat { border-left: 1px solid rgba(22,34,61,.08); }
+  .plat .t { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; color: var(--encre-pale); text-transform: uppercase; }
+  .plat b { display: block; font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: -.02em; margin: 2px 0 7px; }
+  .plat .barre { height: 3px; border-radius: 2px; background: rgba(22,34,61,.09); overflow: hidden; }
+  .plat .barre i { display: block; height: 100%; }
+  .plat .m { font-family: var(--mono); font-size: 10px; color: var(--encre-pale); margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .journal { display: flex; align-items: center; min-width: 0; overflow: hidden; }
+  .journal .lbl { font-family: var(--mono); font-size: 10px; letter-spacing: .14em; color: var(--encre-pale); padding: 0 14px; white-space: nowrap; border-right: 1px solid rgba(22,34,61,.08); }
+  .defile { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+  .defile div { display: inline-block; padding-left: 18px; animation: defile 60s linear infinite; font-size: 13.5px; }
+  .defile em { font-style: normal; font-family: var(--mono); font-size: 11px; color: var(--outremer); margin-right: 6px; }
+  .defile span { margin-right: 46px; }
+  @keyframes defile { to { transform: translateX(-50%); } }
+  .legende { position: fixed; z-index: 2; right: 28px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 10px; color: var(--encre-pale); display: grid; gap: 8px; text-align: right; pointer-events: none; }
+  .legende i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-left: 8px; }
+  .maquette { position: fixed; z-index: 2; left: 28px; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: left top; font-family: var(--mono); font-size: 9px; letter-spacing: .2em; color: var(--encre-pale); opacity: .6; pointer-events: none; }
+  @media (max-width: 860px) { .bas { grid-template-columns: 1fr; } .plats { overflow-x: auto; } .legende, .maquette { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .defile div, .pastille.direct::before { animation: none; } }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Le studio L'Archipel : douze agents IA représentés par des nuées de lettres, chacun au-dessus de son socle"></canvas>
+
+<div class="hud haut">
+  <div class="marque"><h1>L'Archipel</h1><p>Un studio où l'on voit l'IA écrire.</p></div>
+  <div class="pastilles">
+    <div class="pastille direct">EN DIRECT</div>
+    <div class="pastille"><b id="nb"></b>&nbsp;agents écrivent</div>
+    <div class="pastille" id="heure"></div>
+  </div>
+</div>
+<div class="legende">
+  <span>nuée dense : agent au travail<i style="background:var(--outremer)"></i></span>
+  <span>nuée ambre : mission programmée<i style="background:var(--ambre)"></i></span>
+  <span>brume : en veille<i style="background:var(--brume)"></i></span>
+  <span>trait gravé : trajet d'une idée<i style="background:var(--encre)"></i></span>
+</div>
+<div class="maquette" id="maj"></div>
+<div class="hud bas">
+  <div class="carte plats" id="plats"></div>
+  <div class="carte journal"><div class="lbl">JOURNAL DE BORD</div><div class="defile"><div id="defile"></div></div></div>
+</div>
+
+<script>
+// ---------- Données réelles, injectées par scripts/maintenance/build-vitrine.js ----------
+const DONNEES = /*DONNEES*/{"genere_le":"2026-10-15","stations":[{"id":"altair","nom":"Altaïr","role":"repère les idées","etat":"actif","tache":"prochaine fournée","doc":"Fournée du 13/10\n1. DOPPEL Daily\n2. Bot Empire sur itch.io\n3. Le repo de la semaine\n4. Vérificateur Factur-X\n5. Pack n8n — écartée"},{"id":"carina","nom":"Carina","role":"cadre","etat":"veille","tache":null,"doc":null},{"id":"orion","nom":"Orion","role":"imagine les jeux","etat":"planifie","tache":"autopsie de la peur · 23/10","doc":"Mission programmée\n23/10 · autopsie de la peur\nDOPPEL ne fait pas peur.\nPourquoi ?"},{"id":"rigel","nom":"Rigel","role":"fabrique","etat":"actif","tache":"Bot Empire en refonte","doc":"bot-empire.yaml\nvalidee_le: 2026-10-13\npublier_avant: 2026-10-27\nnee_le: null\nnote: À retravailler avant publication (décision utilisateur 2026-10-13). Version actuelle : archipel-ai/bot-empire (GitHub Pages)."},{"id":"atlas","nom":"Atlas","role":"met en ligne","etat":"veille","tache":null,"doc":null},{"id":"sirius","nom":"Sirius","role":"protège","etat":"veille","tache":null,"doc":null},{"id":"castor","nom":"Castor","role":"vérifie","etat":"veille","tache":null,"doc":null},{"id":"aurora","nom":"Aurora","role":"rend beau","etat":"veille","tache":null,"doc":null},{"id":"lyra","nom":"Lyra","role":"raconte","etat":"veille","tache":null,"doc":null},{"id":"nova","nom":"Nova","role":"fait connaître","etat":"veille","tache":null,"doc":null},{"id":"spica","nom":"Spica","role":"mesure le verdict","etat":"actif","tache":"DOPPEL · 40 / 500 vues","doc":"DOPPEL · relevé du 13/10\n40 vues sur 500 : 8 %.\n« Je ne peux pas dire si le jeu\nplaît : on ne l'a presque\npas vu. »"},{"id":"deneb","nom":"Deneb","role":"vue d'ensemble","etat":"veille","tache":null,"doc":null}],"relais":[{"de":"altair","vers":"rigel","objet":"BOT EMPIRE"}],"productions":[{"nom":"Bot Empire","type":"jeu","statut":"au chantier","detail":"sortie avant le 27/10","part":1,"alerte":false},{"nom":"DOPPEL","type":"jeu","statut":"pas encore vue","detail":"8 j de vie · 40 / 500 vues","part":0.26666666666666666,"alerte":true}],"file":["DOPPEL Daily","Le repo de la semaine","Vérificateur Factur-X"],"journal":[{"qui":"Capitaine","texte":"DOPPEL ne sera relancé qu'après sa refonte.","date":"2026-10-13"},{"qui":"Spica","texte":"DOPPEL n'en est qu'à 8 % de son seuil : « on ne l'a presque pas vu ».","date":"2026-10-13"},{"qui":"Sirius","texte":"« Tant que je ne suis pas sûr que rien ne peut trahir les joueurs, ça ne sort pas. »","date":"2026-10-13"},{"qui":"Rigel","texte":"Bot Empire entre au chantier, sortie avant le 27 octobre.","date":"2026-10-13"},{"qui":"Altaïr","texte":"5 idées rapportées au Capitaine, 4 validées.","date":"2026-10-13"},{"qui":"Le Second","texte":"L'équipage reçoit ses noms d'étoiles.","date":"2026-10-13"}]}/*FIN*/;
+const STATIONS = DONNEES.stations;
+const RELAIS = DONNEES.relais.map(r => [r.de, r.vers, r.objet]);
+const PRODUCTIONS = [
+  ...DONNEES.productions.map(p => ({ t: `${p.type} · ${p.statut}`, nom: p.nom, pct: p.part, c: p.alerte ? "var(--alerte)" : "var(--outremer)", m: p.detail })),
+  ...(DONNEES.file.length ? [{ t: "file d'attente", nom: `${DONNEES.file.length} idée${DONNEES.file.length > 1 ? "s" : ""}`, pct: 0, c: "var(--brume)", m: "attendent un bureau libre" }] : [])
+];
+const JOURNAL = DONNEES.journal.map(j => [j.qui, j.texte]);
+
+// ---------- Mise en place ----------
+const css = getComputedStyle(document.documentElement);
+const tok = n => css.getPropertyValue(n).trim();
+const C = { encre: tok("--encre"), pale: tok("--encre-pale"), outremer: tok("--outremer"), ambre: tok("--ambre"), brume: tok("--brume"), socle: tok("--socle"), fond: tok("--porcelaine"), fond2: tok("--porcelaine-2") };
+const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const COULEUR = { actif: C.outremer, planifie: C.ambre, veille: C.brume };
+const DENSITE = { actif: 90, planifie: 50, veille: 16 };
+const REDUIT = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const cv = document.getElementById("c"), ctx = cv.getContext("2d");
+let W, H, S, CX, CY, PETIT;
+function dims() {
+  const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  PETIT = W < 700; // téléphone : la dalle prend toute la largeur, on garde les nuées et les noms
+  S = PETIT ? W / 13 : Math.min(W / 16.5, H / 10.8, 78); CX = W / 2; CY = PETIT ? H * .46 : H * .50;
+}
+addEventListener("resize", dims); dims();
+const iso = (gx, gy, z = 0) => [CX + (gx - gy) * S * .866, CY + (gx + gy) * S * .5 - z * S / 60];
+
+// Serpentin 4 × 3 : la ligne 2 se lit de droite à gauche
+STATIONS.forEach((s, i) => {
+  const row = Math.floor(i / 4), k = i % 4, col = row % 2 ? 3 - k : k;
+  s.gx = col * 2.3 - 3.45; s.gy = row * 2.3 - 2.3;
+  // nuée : lettres tirées du propre texte de l'agent (ou de son nom en veille)
+  const source = (s.doc || s.nom + s.role).replace(/\s+/g, "");
+  s.lettres = Array.from({ length: DENSITE[s.etat] }, (_, j) => ({
+    ch: source[(j * 7) % source.length], a: Math.random() * Math.PI * 2, r: .25 + Math.random() * .75,
+    h: Math.random(), v: (.004 + Math.random() * .01) * (s.etat === "veille" ? .35 : 1), ph: Math.random() * 6.28 }));
+  s.tape = 0; s.pause = 0; s.vols = [];
+});
+const parId = Object.fromEntries(STATIONS.map(s => [s.id, s]));
+
+// ---------- Dessin ----------
+function dalle() {
+  // grande dalle de porcelaine, légèrement plus claire que le fond, avec ombre douce
+  const coins = [[-5.1, -3.9], [5.1, -3.9], [5.1, 3.9], [-5.1, 3.9]].map(([x, y]) => iso(x, y));
+  ctx.save(); ctx.shadowColor = hexA(C.encre, .18); ctx.shadowBlur = 60; ctx.shadowOffsetY = 26;
+  ctx.fillStyle = "#f1f4f7"; ctx.beginPath(); coins.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.restore();
+  // tranche avant
+  const ep = S * .18;
+  ctx.fillStyle = "#d3dae2"; ctx.beginPath(); ctx.moveTo(...coins[3]); ctx.lineTo(...coins[2]); ctx.lineTo(coins[2][0], coins[2][1] + ep); ctx.lineTo(coins[3][0], coins[3][1] + ep); ctx.fill();
+  ctx.fillStyle = "#c4ccd6"; ctx.beginPath(); ctx.moveTo(...coins[2]); ctx.lineTo(...coins[1]); ctx.lineTo(coins[1][0], coins[1][1] + ep); ctx.lineTo(coins[2][0], coins[2][1] + ep); ctx.fill();
+  // quadrillage gravé très fin
+  ctx.strokeStyle = hexA(C.encre, .045); ctx.lineWidth = 1;
+  for (let x = -5; x <= 5; x += .5) { ctx.beginPath(); ctx.moveTo(...iso(x, -3.9)); ctx.lineTo(...iso(x, 3.9)); ctx.stroke(); }
+  for (let y = -3.9; y <= 3.9; y += .5) { ctx.beginPath(); ctx.moveTo(...iso(-5.1, y)); ctx.lineTo(...iso(5.1, y)); ctx.stroke(); }
+}
+
+function trajet() { // le trajet d'une idée, gravé dans la dalle
+  ctx.strokeStyle = hexA(C.encre, .22); ctx.lineWidth = 1.2; ctx.setLineDash([2, 6]);
+  ctx.beginPath(); STATIONS.forEach((s, i) => { const [x, y] = iso(s.gx, s.gy); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.setLineDash([]);
+  const [fx, fy] = iso(STATIONS[11].gx + .9, STATIONS[11].gy);
+  ctx.font = `500 ${Math.max(9, S * .12)}px ${tok("--mono")}`; ctx.fillStyle = C.pale; ctx.fillText("→ le public", fx, fy);
+}
+
+function socle(s) {
+  const w = .62, h = s.etat === "veille" ? 9 : 14;
+  const P = (x, y, z) => iso(s.gx + x, s.gy + y, z);
+  const A = P(-w, w, 0), B = P(w, w, 0), Cc = P(w, -w, 0);
+  const At = P(-w, w, h), Bt = P(w, w, h), Ct = P(w, -w, h), Dt = P(-w, -w, h);
+  ctx.fillStyle = "#cfd7e0"; ctx.beginPath(); [A, B, Bt, At].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.fill();
+  ctx.fillStyle = "#bcc6d2"; ctx.beginPath(); [B, Cc, Ct, Bt].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.fill();
+  const g = ctx.createLinearGradient(Dt[0], Dt[1], Bt[0], Bt[1]);
+  g.addColorStop(0, "#ffffff"); g.addColorStop(1, C.socle);
+  ctx.fillStyle = g; ctx.beginPath(); [Dt, Ct, Bt, At].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.fill();
+  if (s.etat !== "veille") { // liseré lumineux sur le dessus quand l'agent écrit
+    ctx.strokeStyle = hexA(COULEUR[s.etat], .55); ctx.lineWidth = 1.4; ctx.beginPath(); [Dt, Ct, Bt, At, Dt].forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+  }
+  // nom gravé sur la face avant
+  const [nx, ny] = P(0, w + .05, 0);
+  ctx.textAlign = "center";
+  ctx.font = `600 ${Math.max(10, S * .19)}px ${tok("--display")}`; ctx.fillStyle = s.etat === "veille" ? hexA(C.encre, .45) : C.encre;
+  ctx.fillText(s.nom, nx, ny + S * .30);
+  ctx.font = `400 ${Math.max(9, S * .115)}px ${tok("--mono")}`; ctx.fillStyle = s.etat === "veille" ? hexA(C.pale, .7) : COULEUR[s.etat];
+  if (!PETIT) ctx.fillText(s.etat === "veille" ? s.role + " · en veille" : s.role, nx, ny + S * .46);
+  ctx.textAlign = "left";
+  s.centre = P(0, 0, h);
+}
+
+function nuee(s, t) {
+  const [cx, cy] = s.centre, col = COULEUR[s.etat];
+  const haut = s.etat === "veille" ? S * .5 : S * 1.05;
+  if (s.etat !== "veille") { // lueur au cœur de la nuée
+    const g = ctx.createRadialGradient(cx, cy - haut * .5, 0, cx, cy - haut * .5, S * .9);
+    g.addColorStop(0, hexA(col, .16)); g.addColorStop(1, hexA(col, 0)); ctx.fillStyle = g; ctx.fillRect(cx - S, cy - haut * .5 - S, S * 2, S * 2);
+  }
+  ctx.textAlign = "center";
+  s.lettres.forEach(l => {
+    if (!REDUIT) { l.a += l.v; l.h += l.v * .35; if (l.h > 1) l.h -= 1; }
+    // mouvement de nuée : orbite qui ondule, hauteur qui monte en boucle
+    const r = l.r * S * (.42 + .1 * Math.sin(t * .8 + l.ph));
+    const x = cx + Math.cos(l.a) * r, y = cy - l.h * haut + Math.sin(l.a) * r * .38 + Math.sin(t * 1.3 + l.ph) * 3;
+    const prof = (Math.sin(l.a) + 1) / 2; // devant/derrière
+    const alpha = (s.etat === "veille" ? .22 : .35 + .6 * prof) * Math.sin(Math.PI * Math.min(1, l.h * 1.15));
+    ctx.font = `${s.etat === "veille" ? 400 : 500} ${(8 + 5 * prof) * S / 70}px ${tok("--mono")}`;
+    ctx.fillStyle = hexA(col, Math.max(0, alpha));
+    ctx.fillText(l.ch, x, y);
+  });
+  ctx.textAlign = "left";
+}
+
+function feuille(s, t, dt) {
+  if (!s.doc || PETIT) return;
+  const [cx, cy] = s.centre;
+  const fw = S * 2.6, lh = S * .21, lignes = s.doc.split("\n"), fh = lh * (lignes.length + 1.4);
+  let fx = cx - fw / 2, fy = cy - S * 1.55 - fh; // la feuille flotte au-dessus de la nuée
+  if (fy < 110) { fx = cx - fw - S * .7; fy = cy - fh * .75; } // trop haut : la feuille passe à gauche de la nuée
+  fx = Math.max(16, Math.min(W - fw - 16, fx)); fy = Math.max(110, fy);
+  // avance de la frappe : les lettres partent de la nuée vers la feuille
+  const total = s.doc.length;
+  if (s.etat === "actif" && !REDUIT) {
+    if (s.tape < total) { s.acc = (s.acc || 0) + dt * 22; while (s.acc > 1 && s.tape < total) { s.acc--; s.tape++;
+      const ch = s.doc[s.tape - 1]; if (ch.trim()) s.vols.push({ ch, t: 0, x0: cx, y0: cy - S * .6, li: s.doc.slice(0, s.tape).split("\n").length - 1, co: s.doc.slice(0, s.tape).split("\n").pop().length }); } }
+    else if ((s.pause += dt) > 4) { s.tape = 0; s.pause = 0; }
+  } else s.tape = total;
+  // papier
+  ctx.save(); ctx.shadowColor = hexA(C.encre, .14); ctx.shadowBlur = 24; ctx.shadowOffsetY = 10;
+  ctx.fillStyle = "rgba(255,255,255,.94)"; arrondi(fx, fy, fw, fh, 8); ctx.fill(); ctx.restore();
+  ctx.fillStyle = hexA(COULEUR[s.etat], .9); ctx.fillRect(fx, fy + 10, 2.5, fh - 20);
+  // texte tapé
+  const vu = s.doc.slice(0, s.tape).split("\n");
+  ctx.font = `500 ${Math.max(9, S * .125)}px ${tok("--mono")}`;
+  vu.forEach((ligne, i) => { ctx.fillStyle = i === 0 ? C.encre : hexA(C.encre, .78); ctx.fillText(ligne, fx + 14, fy + lh * (i + 1.25)); });
+  // curseur
+  if (s.etat === "actif" && Math.sin(t * 6) > 0) { const d = vu[vu.length - 1]; const w = ctx.measureText(d).width;
+    ctx.fillStyle = COULEUR[s.etat]; ctx.fillRect(fx + 15 + w, fy + lh * (vu.length + .45) - lh * .85, 2, lh * .8); }
+  // lettres en vol, de la nuée vers leur place sur la feuille
+  ctx.textAlign = "center";
+  s.vols = s.vols.filter(v => { v.t += dt * 2.2; if (v.t >= 1) return false;
+    const tx = fx + 14 + v.co * ctx.measureText("M").width, ty = fy + lh * (v.li + 1.25);
+    const e = 1 - Math.pow(1 - v.t, 3), x = v.x0 + (tx - v.x0) * e, y = v.y0 + (ty - v.y0) * e - Math.sin(e * Math.PI) * S * .5;
+    ctx.fillStyle = hexA(COULEUR[s.etat], 1 - v.t * .6); ctx.fillText(v.ch, x, y); return true; });
+  ctx.textAlign = "left";
+}
+
+function arrondi(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function relais(t) { // un ruban de lettres entre deux agents, le long d'un arc
+  RELAIS.forEach(([a, b, objet]) => {
+    const A = parId[a].centre, B = parId[b].centre; if (!A || !B) return;
+    const mx = (A[0] + B[0]) / 2, my = Math.min(A[1], B[1]) - S * 2.2;
+    ctx.strokeStyle = hexA(C.outremer, .15); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(A[0], A[1] - S * .6); ctx.quadraticCurveTo(mx, my, B[0], B[1] - S * .6); ctx.stroke();
+    ctx.font = `500 ${Math.max(9, S * .13)}px ${tok("--mono")}`; ctx.textAlign = "center";
+    const mot = (objet || "").replace(/\s+/g, "") || "·";
+    for (let k = 0; k < mot.length; k++) { const f = ((t * .12) + k / mot.length) % 1, u = 1 - f;
+      const x = u * u * A[0] + 2 * u * f * mx + f * f * B[0], y = u * u * (A[1] - S * .6) + 2 * u * f * my + f * f * (B[1] - S * .6);
+      ctx.fillStyle = hexA(C.outremer, .25 + .6 * Math.sin(f * Math.PI)); ctx.fillText(mot[k], x, y); }
+    ctx.textAlign = "left";
+  });
+}
+
+let avant = performance.now();
+function image(now) {
+  const t = now / 1000, dt = Math.min(.05, (now - avant) / 1000); avant = now;
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, C.fond); g.addColorStop(1, C.fond2);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  dalle(); trajet();
+  const ordre = [...STATIONS].sort((a, b) => (a.gx + a.gy) - (b.gx + b.gy));
+  ordre.forEach(socle);
+  relais(t);
+  ordre.forEach(s => nuee(s, t));
+  ordre.forEach(s => feuille(s, t, dt));
+  if (!REDUIT) requestAnimationFrame(image);
+}
+document.fonts && document.fonts.ready ? document.fonts.ready.then(() => requestAnimationFrame(image)) : requestAnimationFrame(image);
+addEventListener("resize", () => { if (REDUIT) requestAnimationFrame(image); });
+
+// ---------- HUD ----------
+document.getElementById("plats").innerHTML = PRODUCTIONS.map(p => `<div class="plat"><div class="t">${p.t}</div><b>${p.nom}</b>
+  <div class="barre"><i style="width:${p.pct * 100}%;background:${p.c}"></i></div><div class="m">${p.m}</div></div>`).join("");
+const ligne = JOURNAL.map(([q, m]) => `<span><em>${q}</em>${m}</span>`).join("");
+document.getElementById("defile").innerHTML = ligne + ligne;
+document.getElementById("nb").textContent = `${STATIONS.filter(s => s.etat === "actif").length} / ${STATIONS.length}`;
+const [a, m, j] = DONNEES.genere_le.split("-"); document.getElementById("maj").textContent = `MIS À JOUR LE ${j}/${m}/${a}`;
+const heure = document.getElementById("heure"); const tic = () => heure.textContent = new Date().toLocaleTimeString("fr-FR"); tic(); setInterval(tic, 1000);
+</script>
+</body>
+</html>
