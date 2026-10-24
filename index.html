@@ -93,9 +93,6 @@
   .horloge .sur { font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--t2); }
   .horloge .h { font: 600 46px/1 var(--display); letter-spacing: -.02em; color: var(--t1); font-variant-numeric: tabular-nums; margin-top: 6px; }
   .horloge time { display: block; font: 400 12.5px/1.4 var(--mono); color: var(--t2); margin-top: 4px; }
-  .horloge .cle { font: 400 11.5px/1.5 var(--texte); color: var(--t2); margin-top: 4px; }
-  .horloge .cle i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; margin: 0 4px 0 8px; }
-  .horloge .cle i.trait { width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; }
   .maree { position: absolute; top: 150px; left: 28px; z-index: 4; max-width: 420px; background: var(--carte); border: 1px solid var(--carte-bd); border-left: 3px solid #5aa2b1; border-radius: 0 10px 10px 0; padding: 9px 13px; box-shadow: var(--ombre); font: 400 12.5px/1.45 var(--texte); color: var(--carte-l); }
   .maree b { display: block; font: 600 11px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--t1); }
   .cartes-s, .etages { position: absolute; inset: 0; pointer-events: none; list-style: none; z-index: 2; }
@@ -112,8 +109,24 @@
   .lien-agent { border: 0; background: none; padding: 0; font: 600 12.5px/1.4 var(--texte); color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; min-height: 24px; }
   .polaris { position: absolute; z-index: 2; max-width: 260px; background: var(--carte); border: 1px solid var(--carte-bd); border-left: 3px solid #cfe3ff; border-radius: 0 8px 8px 0; padding: 6px 11px 7px; font: 400 12.5px/1.4 var(--texte); color: var(--carte-l); box-shadow: var(--ombre); }
   .polaris .lien-agent { display: block; font: 500 10.5px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
-  .legende-s { position: absolute; left: 28px; bottom: 22px; z-index: 2; max-width: 610px; font-size: 13px; line-height: 1.5; color: var(--carte-l); background: var(--carte); border: 1px solid var(--carte-bd); border-radius: 10px; padding: 9px 13px; box-shadow: var(--ombre); }
-  .legende-s b { color: var(--t1); font-weight: 600; }
+  .haut .fil { font: 400 13.5px/1.45 var(--texte); color: var(--t1); margin-top: 10px; max-width: 34ch; }
+  /* épure : le détail des fiches et des étages n'apparaît qu'au survol ou au focus */
+  .fiche-ile .det, .etages li .det { display: none; }
+  .fiche-ile:hover, .fiche-ile:focus-within, .etages li:hover, .etages li:focus-within { z-index: 6; }
+  .fiche-ile:hover .det, .fiche-ile:focus-within .det { display: block; }
+  .etages li:hover .det, .etages li:focus-within .det { display: block; }
+  .etages li { cursor: default; }
+  .etages li:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .aide { position: absolute; left: 28px; bottom: 22px; z-index: 4; max-width: 560px; }
+  .aide summary { list-style: none; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: 500 12px/1 var(--mono); color: var(--carte-l); background: var(--carte); border: 1px solid var(--carte-bd); border-radius: 999px; padding: 6px 12px 6px 6px; box-shadow: var(--ombre); }
+  .aide summary::-webkit-details-marker { display: none; }
+  .aide summary > span[aria-hidden] { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--t1); color: var(--carte); font-weight: 600; }
+  .aide-corps { margin-top: 8px; font-size: 13px; line-height: 1.5; color: var(--carte-l); background: var(--carte); border: 1px solid var(--carte-bd); border-radius: 10px; padding: 9px 13px; box-shadow: var(--ombre); }
+  .aide-corps b { color: var(--t1); font-weight: 600; }
+  .aide .cle { font: 400 11.5px/1.5 var(--texte); color: var(--t2); margin-top: 6px; }
+  .aide .cle i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: -1px; margin: 0 4px 0 8px; }
+  .aide .cle i:first-child { margin-left: 0; }
+  .aide .cle i.trait { width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; }
   .plonger { position: absolute; right: 28px; bottom: 24px; z-index: 2; font: 500 12px/1 var(--mono); letter-spacing: .06em; color: var(--accent); text-decoration: none; border: 1px solid var(--pill-bd); border-radius: 999px; padding: 13px 16px; background: var(--carte); box-shadow: var(--ombre); }
 
   /* ---------- sections de la surface (îles, naissances, journal, équipage) ---------- */
@@ -147,10 +160,15 @@
   .vide-msg { color: var(--t2); font-style: italic; }
   .vers-lagon { display: inline-block; margin-top: 18px; font-family: var(--mono); font-size: 13px; text-underline-offset: 3px; padding: 6px 0; }
   .idees { list-style: none; display: grid; gap: 10px; counter-reset: rang; }
-  .idee { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; background: var(--carte-plein); border: 1px solid var(--carte-bd); border-radius: 14px; padding: 16px 18px; counter-increment: rang; }
+  .idee { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: start; background: var(--carte-plein); border: 1px solid var(--carte-bd); border-radius: 14px; padding: 12px 18px; counter-increment: rang; }
   .idee::before { content: counter(rang); font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1; color: var(--ambre); min-width: 1.2em; }
   .idee h3 { font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: -.02em; }
-  .idee p { color: var(--t2); font-size: 15px; margin-top: 2px; }
+  .idee p { color: var(--t2); font-size: 15px; margin-top: 6px; }
+  .idee summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .idee summary::-webkit-details-marker { display: none; }
+  .idee summary::after { content: "+"; font: 500 16px/1 var(--mono); color: var(--accent); }
+  .idee details[open] summary::after { content: "−"; }
+  .idee summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
   .idee .note { font-family: var(--mono); font-size: 14px; text-align: right; white-space: nowrap; color: var(--t2); }
   .idee .note b { font-size: 20px; font-weight: 500; color: var(--t1); }
   .vote { margin-top: 18px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -171,6 +189,8 @@
   .equipe .pt { width: 10px; height: 10px; border-radius: 50%; }
   .equipe b { font-family: var(--display); font-weight: 600; }
   .equipe small { grid-column: 2; color: var(--t2); font-size: 13px; }
+  .equipe ul.compact { display: flex; flex-wrap: wrap; gap: 6px; }
+  .equipe ul.compact button { width: auto; padding: 8px 12px; }
 
   /* ---------- lagon : clair sous la surface (zone claire minimale --zc), puis il s'assombrit jusqu'au bleu nuit des abysses ---------- */
   #lagon { position: relative; overflow: hidden; padding-bottom: 30px; margin-top: 72px;
@@ -267,18 +287,16 @@
     .haut { top: 14px; left: 16px; right: 16px; }
     .haut h1 { font-size: 32px; }
     .haut .sous { font-size: 15.5px; }
-    .horloge { top: 150px; left: 16px; right: auto; text-align: left; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
-    .horloge .sur { flex-basis: 100%; }
-    .horloge .h { font-size: 28px; margin-top: 4px; }
-    .horloge time { font-size: 11.5px; margin-top: 0; }
-    .horloge .cle { flex-basis: 100%; font-size: 11px; margin-top: 0; }
-    .horloge .cle i:first-child { margin-left: 0; }
+    .horloge { top: 18px; right: 16px; left: auto; text-align: right; } /* l'heure seule, à côté du titre : la phrase du fil rouge garde sa place */
+    .horloge .sur, .horloge time { display: none; }
+    .horloge .h { font-size: 26px; margin-top: 0; }
     .maree { position: static; margin: 12px 12px 0; max-width: none; }
     .cartes-s { display: none; } /* la section « Les îles » suit immédiatement, avec les mêmes fiches */
     .etages { position: static; inset: auto; pointer-events: auto; display: grid; gap: 6px; padding: 14px 12px 0; }
     .etages li { position: static; max-width: none; }
     .polaris { position: static; margin: 10px 12px 0; max-width: none; }
-    .legende-s { position: static; margin: 16px 12px 0; font-size: 12.5px; max-width: none; }
+    .aide { position: static; margin: 16px 12px 0; max-width: none; }
+    .etages li .det { display: block; } /* au téléphone, pas de survol : tout reste lisible */
     .plonger { position: static; display: inline-block; margin: 14px 12px 0; }
     main section.bloc { padding: 48px 16px 4px; }
     .idee { grid-template-columns: auto 1fr; }
@@ -303,7 +321,7 @@
 
   /* ---------- image de partage (rendu headless 1200×630, ?partage=1) ---------- */
   html.partage .barre, html.partage main > :not(#surface), html.partage footer, html.partage .cartes-s, html.partage .etages, html.partage .polaris,
-  html.partage .legende-s, html.partage .plonger, html.partage .horloge, html.partage .maree, html.partage .sr, html.partage .pastilles { display: none !important; }
+  html.partage .aide, html.partage .fil, html.partage .plonger, html.partage .horloge, html.partage .maree, html.partage .sr, html.partage .pastilles { display: none !important; }
   html.partage .haut { top: 44px; left: 52px; max-width: 520px; }
   html.partage .haut h1 { font-size: 96px; }
   html.partage .haut .sous { font-size: 30px; max-width: 13ch; margin-top: 10px; line-height: 1.15; }
@@ -363,20 +381,19 @@
     <span class="ancre" id="loft" aria-hidden="true"></span>
     <div class="scene" id="scene"><canvas id="cs" role="img"></canvas></div>
     <div class="haut">
-      <h1 id="titre-surface">L'Archipel</h1><p class="sous" data-i18n="sous_titre"></p>
+      <h1 id="titre-surface">L'Archipel</h1><p class="sous" data-i18n="sous_titre"></p><p class="fil" data-i18n="fil_rouge"></p>
       <div class="pastilles"><span class="pastille" id="nb"></span><span class="pastille" id="moment"></span></div>
     </div>
     <div class="horloge" role="group" data-i18n-aria="heure_studio">
       <div class="sur" data-i18n="heure_studio"></div>
       <div class="h" id="heure">--:--</div>
       <time id="date"></time>
-      <div class="cle" id="cle-horloge"></div>
     </div>
     <aside class="maree" id="maree" hidden><b data-i18n="maree_titre"></b><span data-i18n="maree_texte"></span></aside>
     <div class="cartes-s" id="cartes-s"></div>
     <ol class="etages" id="etages" data-i18n-aria="etages_aria"></ol>
     <p class="polaris" id="polaris" hidden><button type="button" class="lien-agent" data-agent="polaris" data-i18n="polaris_titre"></button><span data-i18n="polaris_texte"></span></p>
-    <p class="legende-s" id="legende"></p>
+    <details class="aide"><summary><span aria-hidden="true">?</span><span class="aide-l" data-i18n="aide"></span></summary><div class="aide-corps"><p id="legende"></p><div class="cle" id="cle-horloge"></div></div></details>
     <a class="plonger" href="#lagon" data-i18n="plonger"></a>
   </section>
 
@@ -413,7 +430,6 @@
         <div class="sur" data-i18n="lagon_sur"></div>
         <h2 id="titre-lagon" data-i18n="lagon_titre"></h2>
         <p data-i18n="lagon_intro"></p>
-        <ul class="regles"><li data-i18n="regle_surface"></li><li data-i18n="regle_strate"></li><li data-i18n="regle_banc"></li></ul>
       </div>
     </div>
     <div id="strates"></div>
@@ -492,6 +508,7 @@ const TXT = {
   fr: {
     saut: "Aller aux productions", nav: "Sections", nav_surface: "La surface", nav_iles: "Les îles", nav_naissances: "Bureau des naissances", nav_journal: "Journal de bord", nav_equipage: "L'équipage", nav_lagon: "Le lagon",
     langue: "Langue", rss: "Flux RSS du journal de bord", fermer: "Fermer la fiche",
+    fil_rouge: "Chaque jeu a 30 jours pour trouver son public. Ici, on voit lesquels survivent.",
     sous_titre: "Un studio où l'on voit l'IA écrire.", nb: (n, t) => `<b>${n} / ${t}</b>&nbsp;agents écrivent`,
     moment_jour: "jour · <b>le Capitaine est là</b>", moment_nuit: "nuit · <b>Polaris veille</b>",
     heure_studio: "heure du studio", locale: "fr-FR",
@@ -499,6 +516,7 @@ const TXT = {
     maree_titre: "Marée basse · démonstration", maree_texte: "L'eau s'est retirée : le studio a atteint sa limite de calcul, les îles attendent la marée montante. Aucune donnée réelle derrière cet état.",
     etages_aria: "Les étages de la tour, du sommet à la base",
     polaris_titre: "Polaris veille", polaris_texte: "La nuit, Polaris fait tourner le studio et republie la vitrine.",
+    aide: "Comment lire la carte",
     legende_jour: "<b>L'atoll est un cadran.</b> Le soleil en fait le tour et donne l'heure du studio ; ",
     legende_nuit: "<b>La porcelaine luit de l'intérieur.</b> Le Capitaine dort. La nuit, Polaris fait tourner le studio et republie la vitrine. La lune fait le tour de l'atoll et donne l'heure du studio ; ",
     legende_fin: "le récif est un calendrier (le mois n s'achève sur l'heure n), chaque île naît à sa date. <b>Plus une île est vue, plus elle reçoit de lumière.</b> À la surface, jamais plus de 3 îles et l'île à naître.",
@@ -559,6 +577,7 @@ const TXT = {
   en: {
     saut: "Skip to productions", nav: "Sections", nav_surface: "The surface", nav_iles: "The islands", nav_naissances: "Birth office", nav_journal: "Logbook", nav_equipage: "The crew", nav_lagon: "The lagoon",
     langue: "Language", rss: "Logbook RSS feed", fermer: "Close the card",
+    fil_rouge: "Every game gets 30 days to find its players. Here, you watch which ones make it.",
     sous_titre: "A studio where you watch AI write.", nb: (n, t) => `<b>${n} / ${t}</b>&nbsp;agents writing`,
     moment_jour: "day · <b>the Captain is here</b>", moment_nuit: "night · <b>Polaris keeps watch</b>",
     heure_studio: "studio time", locale: "en-GB",
@@ -566,6 +585,7 @@ const TXT = {
     maree_titre: "Low tide · demonstration", maree_texte: "The water has withdrawn: the studio has hit its computing limit, the islands wait for the rising tide. No real data behind this state.",
     etages_aria: "The floors of the tower, from top to bottom",
     polaris_titre: "Polaris keeps watch", polaris_texte: "At night, Polaris runs the studio and republishes the showcase.",
+    aide: "How to read the map",
     legende_jour: "<b>The atoll is a clock face.</b> The sun goes round it and tells the studio's time; ",
     legende_nuit: "<b>The porcelain glows from within.</b> The Captain is asleep. At night, Polaris runs the studio and republishes the showcase. The moon goes round the atoll and tells the studio's time; ",
     legende_fin: "the reef is a calendar (month n ends on hour n), each island is born on its date. <b>The more an island is seen, the more light it gets.</b> On the surface, never more than 3 islands plus the island to be born.",
@@ -1270,7 +1290,7 @@ function image(now) {
 // ---------- textes de la surface (DOM : lisibles, accessibles) ----------
 function ficheIleHTML(o) {
   const el = document.createElement("article"); el.className = "fiche-ile"; el.style.setProperty("--c", o.couleur);
-  el.innerHTML = `<h3>${esc(o.titre)}</h3><p class="etat"><i></i>${esc(o.etat)}</p>` + o.lignes.filter(Boolean).map(l => `<p class="l">${esc(l)}</p>`).join("") +
+  el.innerHTML = `<h3>${esc(o.titre)}</h3><p class="etat"><i></i>${esc(o.etat)}</p>` + (o.lignes.some(Boolean) ? `<div class="det">${o.lignes.filter(Boolean).map(l => `<p class="l">${esc(l)}</p>`).join("")}</div>` : "") +
     (o.part != null ? `<div class="jauge-s" role="meter" aria-label="${esc(o.aria)}" aria-valuemin="0" aria-valuemax="${o.seuil}" aria-valuenow="${Math.min(o.vues, o.seuil)}"><span style="width:${Math.max(2, Math.round(o.part * 100))}%"></span></div>` : "") +
     (o.lien ? `<a class="jouer" href="${esc(o.lien)}" target="_blank" rel="noopener">${esc(t("jouer_court"))}<span class="sr"> ${esc(t("nouvel_onglet"))}</span></a>` : "") +
     (o.ancre ? `<a class="jouer" href="${o.ancre}">${esc(t("voir_idees"))}</a>` : "");
@@ -1306,7 +1326,7 @@ function construireTextes() {
     cartes.appendChild(el); S.cartes.push({ el, id: "naitre" });
   }
   const ol = document.getElementById("etages"); ol.innerHTML = "";
-  S.lis = [...ETAGES].reverse().map(e => { const li = document.createElement("li"); li.style.setProperty("--c", e.c); li.innerHTML = `<b>${esc(t("etage")[e.id])}</b>${texteEtage(e.id)}`; ol.appendChild(li); return { li, id: e.id }; });
+  S.lis = [...ETAGES].reverse().map(e => { const li = document.createElement("li"); li.style.setProperty("--c", e.c); li.tabIndex = 0; li.innerHTML = `<b>${esc(t("etage")[e.id])}</b><span class="det">${texteEtage(e.id)}</span>`; ol.appendChild(li); return { li, id: e.id }; });
 }
 /** Place les fiches à gauche (îles), le registre des étages à droite de la tour, l'étiquette de Polaris ; calcule les traits. */
 function placerTextes() {
@@ -1514,7 +1534,7 @@ S.cv.addEventListener("mousemove", ev => { S.cv.style.cursor = cibleSous(ev) ? "
 // SECTIONS (re-rendues à chaque changement de langue)
 // =====================================================================
 let journalOuvert = false;
-const JOURNAL_COURT = 12;
+const JOURNAL_COURT = 5;
 function lien(href, texte, classe) { const u = httpsSeul(href); return u ? `<a class="bouton ${classe}" href="${esc(u)}" target="_blank" rel="noopener">${esc(texte)}<span class="sr"> ${esc(t("nouvel_onglet"))}</span></a>` : ""; }
 function jauge(lbl, val, part, cls) { return `<div class="jauge ${cls}"><div class="l"><span>${esc(lbl)}</span><span>${esc(val)}</span></div><div class="barre-j" role="presentation"><i style="width:${Math.round(clamp(part) * 100)}%"></i></div></div>`; }
 function rendreProductions() {
@@ -1539,7 +1559,7 @@ function rendreNaissances() {
   const b = DONNEES.bureau;
   document.getElementById("naiss-intro").textContent = t("naiss_intro", b.fournee);
   document.getElementById("idees").innerHTML = b.idees.length ? b.idees.map(i =>
-    `<li class="idee"><div><h3>${esc(i.nom)}</h3><span class="meta">${esc(t("type")[i.type] || i.type)}</span><p${langFr(i, "pitch")}>${esc(champ(i, "pitch"))}</p></div><div class="note"><span class="sr">${esc(t("note"))} </span><b>${esc(fmtN(i.note))}</b> / 10</div></li>`).join("")
+    `<li class="idee"><details><summary><h3>${esc(i.nom)}</h3><span class="meta">${esc(t("type")[i.type] || i.type)}</span></summary><p${langFr(i, "pitch")}>${esc(champ(i, "pitch"))}</p></details><div class="note"><span class="sr">${esc(t("note"))} </span><b>${esc(fmtN(i.note))}</b> / 10</div></li>`).join("")
     : `<li class="vide-msg">${esc(t("naiss_vide"))}</li>`;
   const vote = lien(b.vote_url, t("voter"), "");
   document.getElementById("vote").innerHTML = vote ? `${vote}<p>${esc(t("vote_ouvert"))}</p>` : `<button type="button" class="bouton" disabled>${esc(t("vote_ferme"))}</button><p>${esc(t("vote_msg"))}</p>`;
@@ -1559,9 +1579,9 @@ function rendreEquipe() {
   const etoiles = AGENTS.filter(a => !a.vent).length, vents = AGENTS.length - etoiles;
   document.getElementById("equipe-intro").textContent = t("equipe_intro", etoiles, vents);
   const groupes = ["ateliers", "cuisine", "salon"].map(p => [p, occupants(p)]).filter(([, l]) => l.length);
-  const bouton = (id, nom, col, sous) => `<li><button type="button" data-agent="${esc(id)}"><span class="pt" style="background:${col}" aria-hidden="true"></span><b>${esc(nom)}</b><small>${esc(sous)}</small></button></li>`;
-  document.getElementById("equipe").innerHTML = groupes.map(([p, l]) => `<div><h3>${esc(t("groupe")[p])}</h3><ul>${l.map(a =>
-    bouton(a.id, a.nom, a.c, `${champ(a, "role")}${champ(a, "tache") && a.etat !== "veille" ? " · " + champ(a, "tache") : ""}`)).join("")}</ul></div>`).join("")
+  const bouton = (id, nom, col, sous) => `<li><button type="button" data-agent="${esc(id)}"><span class="pt" style="background:${col}" aria-hidden="true"></span><b>${esc(nom)}</b>${sous ? `<small>${esc(sous)}</small>` : ""}</button></li>`;
+  document.getElementById("equipe").innerHTML = groupes.map(([p, l]) => `<div><h3>${esc(t("groupe")[p])}</h3><ul${p === "salon" ? ' class="compact"' : ""}>${l.map(a =>
+    bouton(a.id, a.nom, a.c, p === "salon" ? "" : `${champ(a, "role")}${champ(a, "tache") ? " · " + champ(a, "tache") : ""}`)).join("")}</ul></div>`).join("")
     + `<div><h3>${esc(t("groupe").conseil)}</h3><ul>${bouton("capitaine", t("capitaine"), C.encre, t("capitaine_role"))}</ul>`
     + `<h3 style="margin-top:16px">${esc(t("groupe").nuit)}</h3><ul>${bouton("polaris", DONNEES.polaris.nom, "#9fb8ff", t("polaris_texte"))}</ul></div>`;
 }
